@@ -1,6 +1,6 @@
 package com.hostel.controller;
 
-import com.hostel.entity.Student;
+import com.hostel.dto.StudentDto;
 import com.hostel.entity.User;
 import com.hostel.repository.UserRepository;
 import com.hostel.service.StudentService;
@@ -25,14 +25,14 @@ public class StudentController {
 
     // Admin endpoints
     @GetMapping("/admin/students")
-    public ResponseEntity<List<Student>> getAllStudents() {
-        List<Student> students = studentService.getAllStudents();
+    public ResponseEntity<List<StudentDto>> getAllStudents() {
+        List<StudentDto> students = studentService.getAllStudentsWithUsers();
         return ResponseEntity.ok(students);
     }
 
     @GetMapping("/admin/students/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
-        Student student = studentService.getStudentById(id);
+    public ResponseEntity<StudentDto> getStudentById(@PathVariable Long id) {
+        StudentDto student = studentService.getStudentById(id);
         if (student != null) {
             return ResponseEntity.ok(student);
         }
@@ -40,8 +40,8 @@ public class StudentController {
     }
 
     @PostMapping("/admin/students/{userId}")
-    public ResponseEntity<Student> createStudent(@PathVariable Long userId) {
-        Student student = studentService.createStudent(userId);
+    public ResponseEntity<StudentDto> createStudent(@PathVariable Long userId) {
+        StudentDto student = studentService.createStudent(userId);
         if (student != null) {
             return ResponseEntity.ok(student);
         }
@@ -49,8 +49,8 @@ public class StudentController {
     }
 
     @PutMapping("/admin/students/{id}/{userId}")
-    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @PathVariable Long userId) {
-        Student student = studentService.updateStudent(id, userId);
+    public ResponseEntity<StudentDto> updateStudent(@PathVariable Long id, @PathVariable Long userId) {
+        StudentDto student = studentService.updateStudent(id, userId);
         if (student != null) {
             return ResponseEntity.ok(student);
         }
@@ -65,13 +65,13 @@ public class StudentController {
 
     // Student endpoints
     @GetMapping("/student/profile")
-    public ResponseEntity<Student> getStudentProfile() {
+    public ResponseEntity<StudentDto> getStudentProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             String email = authentication.getName();
             User user = userRepository.findByEmail(email).orElse(null);
             if (user != null) {
-                Student student = studentService.getStudentByUserId(user.getId());
+                StudentDto student = studentService.getStudentByUserId(user.getId());
                 if (student != null) {
                     return ResponseEntity.ok(student);
                 }

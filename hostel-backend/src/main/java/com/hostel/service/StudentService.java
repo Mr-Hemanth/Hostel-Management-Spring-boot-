@@ -1,6 +1,10 @@
 package com.hostel.service;
 
+import com.hostel.dto.RoomDto;
+import com.hostel.dto.StudentDto;
+import com.hostel.dto.UserDisplayDto;
 import com.hostel.entity.Role;
+import com.hostel.entity.Room;
 import com.hostel.entity.Student;
 import com.hostel.entity.User;
 import com.hostel.repository.StudentRepository;
@@ -20,18 +24,43 @@ public class StudentService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
+    public List<StudentDto> getAllStudents() {
+        List<Student> students = studentRepository.findAll();
+        List<StudentDto> studentDtos = new ArrayList<>();
+        
+        for (Student student : students) {
+            User user = student.getUser();
+            UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+            RoomDto roomDto = null;
+            if (student.getRoom() != null) {
+                Room room = student.getRoom();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+            }
+            
+            studentDtos.add(new StudentDto(student.getId(), userDto, roomDto));
+        }
+        
+        return studentDtos;
     }
 
-    public List<Student> getStudentsWithoutRooms() {
-        return studentRepository.findStudentsWithoutRooms();
+    public List<StudentDto> getStudentsWithoutRooms() {
+        List<Student> students = studentRepository.findStudentsWithoutRooms();
+        List<StudentDto> studentDtos = new ArrayList<>();
+        
+        for (Student student : students) {
+            User user = student.getUser();
+            UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+            
+            studentDtos.add(new StudentDto(student.getId(), userDto, null));
+        }
+        
+        return studentDtos;
     }
     
-    public List<Student> getAllStudentsWithUsers() {
+    public List<StudentDto> getAllStudentsWithUsers() {
         // Ensure all users with STUDENT role have corresponding student records
         List<User> studentUsers = userRepository.findByRole(Role.STUDENT);
-        List<Student> students = new ArrayList<>();
+        List<StudentDto> studentDtos = new ArrayList<>();
         
         for (User user : studentUsers) {
             Student student = studentRepository.findByUserId(user.getId());
@@ -41,17 +70,39 @@ public class StudentService {
                 student.setUser(user);
                 student = studentRepository.save(student);
             }
-            students.add(student);
+            
+            // Create DTO with proper user and room data
+            UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+            RoomDto roomDto = null;
+            if (student.getRoom() != null) {
+                Room room = student.getRoom();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+            }
+            
+            StudentDto studentDto = new StudentDto(student.getId(), userDto, roomDto);
+            studentDtos.add(studentDto);
         }
         
-        return students;
+        return studentDtos;
     }
 
-    public Student getStudentById(Long id) {
-        return studentRepository.findById(id).orElse(null);
+    public StudentDto getStudentById(Long id) {
+        Student student = studentRepository.findById(id).orElse(null);
+        if (student != null) {
+            User user = student.getUser();
+            UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+            RoomDto roomDto = null;
+            if (student.getRoom() != null) {
+                Room room = student.getRoom();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+            }
+            
+            return new StudentDto(student.getId(), userDto, roomDto);
+        }
+        return null;
     }
 
-    public Student getStudentByUserId(Long userId) {
+    public StudentDto getStudentByUserId(Long userId) {
         Student student = studentRepository.findByUserId(userId);
         if (student == null) {
             // If no student exists for this user, create one
@@ -62,32 +113,67 @@ public class StudentService {
                 student = studentRepository.save(student);
             }
         }
-        return student;
+        
+        if (student != null) {
+            // Create DTO with proper user and room data
+            User user = student.getUser();
+            UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+            RoomDto roomDto = null;
+            if (student.getRoom() != null) {
+                Room room = student.getRoom();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+            }
+            
+            return new StudentDto(student.getId(), userDto, roomDto);
+        }
+        return null;
     }
 
-    public Student createStudent(Long userId) {
+    public StudentDto createStudent(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null) {
             // Check if student already exists for this user
             Student existingStudent = studentRepository.findByUserId(userId);
             if (existingStudent != null) {
-                return existingStudent; // Return existing student if already exists
+                // Return existing student as DTO if already exists
+                UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+                RoomDto roomDto = null;
+                if (existingStudent.getRoom() != null) {
+                    Room room = existingStudent.getRoom();
+                    roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+                }
+                            
+                return new StudentDto(existingStudent.getId(), userDto, roomDto);
             }
             
             Student student = new Student();
             student.setUser(user);
-            return studentRepository.save(student);
+            Student savedStudent = studentRepository.save(student);
+            
+            // Create and return DTO
+            UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+            return new StudentDto(savedStudent.getId(), userDto, null);
         }
         return null;
     }
 
-    public Student updateStudent(Long id, Long userId) {
+    public StudentDto updateStudent(Long id, Long userId) {
         Student student = studentRepository.findById(id).orElse(null);
         User user = userRepository.findById(userId).orElse(null);
         
         if (student != null && user != null) {
             student.setUser(user);
-            return studentRepository.save(student);
+            Student updatedStudent = studentRepository.save(student);
+            
+            // Create and return DTO
+            UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+            RoomDto roomDto = null;
+            if (updatedStudent.getRoom() != null) {
+                Room room = updatedStudent.getRoom();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+            }
+            
+            return new StudentDto(updatedStudent.getId(), userDto, roomDto);
         }
         return null;
     }

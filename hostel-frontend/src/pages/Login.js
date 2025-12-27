@@ -28,39 +28,41 @@ const Login = () => {
 
     return (
         <div className="form-container">
-            <h2 className="form-title">Hostel Management System</h2>
-            <h3 className="form-title">Login</h3>
+            <h2 className="form-title">🏢 Hostel Management System</h2>
+            <h3 className="form-subtitle">Sign in to your account</h3>
             
             {error && <div className="alert alert-error">{error}</div>}
             
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label htmlFor="email">Email</label>
+                    <label htmlFor="email">📧 Email</label>
                     <input
                         type="email"
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        placeholder="Enter your email"
                     />
                 </div>
                 
                 <div className="form-group">
-                    <label htmlFor="password">Password</label>
+                    <label htmlFor="password">🔒 Password</label>
                     <input
                         type="password"
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        placeholder="Enter your password"
                     />
                 </div>
                 
                 <button type="submit" className="btn">Login</button>
             </form>
             
-            <div style={{ marginTop: '15px', textAlign: 'center' }}>
-                <p>Don't have an account? <Link to="/register">Register here</Link></p>
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <p>Don't have an account? <Link to="/register" style={{ color: '#3498db', fontWeight: '500' }}>Register here</Link></p>
             </div>
         </div>
     );

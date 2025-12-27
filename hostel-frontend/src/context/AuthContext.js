@@ -53,7 +53,12 @@ export const AuthProvider = ({ children }) => {
             const response = await api.post('/auth/register', { name, email, password, role });
             
             if (response.status === 200) {
-                return { success: true, message: 'Registration successful' };
+                const data = response.data;
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify({ email, role: data.role }));
+                setToken(data.token);
+                setUser({ email, role: data.role });
+                return { success: true, message: data.message, role: data.role };
             } else {
                 return { success: false, message: response.data || 'Registration failed' };
             }

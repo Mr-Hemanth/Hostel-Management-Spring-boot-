@@ -5,6 +5,7 @@ import com.hostel.dto.AuthResponse;
 import com.hostel.dto.UserDto;
 import com.hostel.entity.User;
 import com.hostel.service.AuthService;
+import com.hostel.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
@@ -24,8 +28,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDto userDto) {
+    public ResponseEntity<AuthResponse> register(@RequestBody UserDto userDto) {
         User user = authService.registerUser(userDto);
-        return ResponseEntity.ok("User registered successfully");
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        return ResponseEntity.ok(new AuthResponse(token, "User registered successfully", user.getRole().name()));
     }
 }

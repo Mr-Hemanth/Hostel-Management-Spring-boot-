@@ -28,6 +28,33 @@ CREATE TABLE students (
     FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL
 );
 
+-- Create maintenance_requests table
+CREATE TABLE maintenance_requests (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    room_id BIGINT NOT NULL,
+    student_id BIGINT NOT NULL,
+    description TEXT NOT NULL,
+    status ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    remarks TEXT,
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
+
+-- Create room_booking_requests table
+CREATE TABLE room_booking_requests (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    room_id BIGINT NOT NULL,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    admin_remarks TEXT,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+);
+
 -- Insert sample admin user (password is 'admin123' hashed with BCrypt)
 INSERT INTO users (name, email, password, role) VALUES 
 ('Admin User', 'admin@hostel.com', '$2a$10$Nk6r4H8u1I5q.PJYz9Pq1eF9Z8Q4H3N2W7V6U5T4S3R2Q1P0O9N8M', 'ADMIN');
@@ -39,3 +66,9 @@ INSERT INTO rooms (room_number, capacity) VALUES
 ('103', 1),
 ('201', 4),
 ('202', 3);
+
+-- Insert sample maintenance requests
+INSERT INTO maintenance_requests (room_id, student_id, description, status) VALUES
+(1, 1, 'Leaky faucet in bathroom', 'PENDING'),
+(2, 2, 'Broken window pane', 'IN_PROGRESS'),
+(3, 3, 'AC not cooling properly', 'COMPLETED');

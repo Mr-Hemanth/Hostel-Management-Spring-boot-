@@ -3,6 +3,7 @@ package com.hostel.controller;
 import com.hostel.dto.RoomDto;
 import com.hostel.entity.Room;
 import com.hostel.service.RoomService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +19,14 @@ public class RoomController {
     private RoomService roomService;
 
     @GetMapping("/rooms")
-    public ResponseEntity<List<Room>> getAllRooms() {
-        List<Room> rooms = roomService.getAllRooms();
+    public ResponseEntity<List<RoomDto>> getAllRooms() {
+        List<RoomDto> rooms = roomService.getAllRooms();
         return ResponseEntity.ok(rooms);
     }
 
     @GetMapping("/rooms/{id}")
-    public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
-        Room room = roomService.getRoomById(id);
+    public ResponseEntity<RoomDto> getRoomById(@PathVariable Long id) {
+        RoomDto room = roomService.getRoomById(id);
         if (room != null) {
             return ResponseEntity.ok(room);
         }
@@ -33,9 +34,9 @@ public class RoomController {
     }
 
     @PostMapping("/rooms")
-    public ResponseEntity<?> createRoom(@RequestBody RoomDto roomDto) {
+    public ResponseEntity<?> createRoom(@Valid @RequestBody RoomDto roomDto) {
         try {
-            Room room = roomService.createRoom(roomDto);
+            RoomDto room = roomService.createRoom(roomDto);
             return ResponseEntity.ok(room);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -43,9 +44,9 @@ public class RoomController {
     }
 
     @PutMapping("/rooms/{id}")
-    public ResponseEntity<?> updateRoom(@PathVariable Long id, @RequestBody RoomDto roomDto) {
+    public ResponseEntity<?> updateRoom(@PathVariable Long id, @Valid @RequestBody RoomDto roomDto) {
         try {
-            Room room = roomService.updateRoom(id, roomDto);
+            RoomDto room = roomService.updateRoom(id, roomDto);
             if (room != null) {
                 return ResponseEntity.ok(room);
             }
@@ -62,8 +63,8 @@ public class RoomController {
     }
 
     @PutMapping("/rooms/{roomId}/allocate/{studentId}")
-    public ResponseEntity<Room> allocateRoomToStudent(@PathVariable Long roomId, @PathVariable Long studentId) {
-        Room room = roomService.allocateRoomToStudent(roomId, studentId);
+    public ResponseEntity<RoomDto> allocateRoomToStudent(@PathVariable Long roomId, @PathVariable Long studentId) {
+        RoomDto room = roomService.allocateRoomToStudent(roomId, studentId);
         if (room != null) {
             return ResponseEntity.ok(room);
         }
@@ -71,8 +72,17 @@ public class RoomController {
     }
 
     @PutMapping("/rooms/{roomId}/deallocate")
-    public ResponseEntity<Room> deallocateRoom(@PathVariable Long roomId) {
-        Room room = roomService.deallocateRoom(roomId);
+    public ResponseEntity<RoomDto> deallocateRoom(@PathVariable Long roomId) {
+        RoomDto room = roomService.deallocateRoom(roomId);
+        if (room != null) {
+            return ResponseEntity.ok(room);
+        }
+        return ResponseEntity.badRequest().build();
+    }
+    
+    @PutMapping("/rooms/{roomId}/deallocate-student/{studentId}")
+    public ResponseEntity<RoomDto> deallocateStudentFromRoom(@PathVariable Long roomId, @PathVariable Long studentId) {
+        RoomDto room = roomService.deallocateStudentFromRoom(roomId, studentId);
         if (room != null) {
             return ResponseEntity.ok(room);
         }
