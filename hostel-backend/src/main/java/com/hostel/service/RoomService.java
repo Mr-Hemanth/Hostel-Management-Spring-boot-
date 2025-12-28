@@ -39,8 +39,26 @@ public class RoomService {
                 }
             }
             
-            RoomDto roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied(), studentSummaryDtos);
+            boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+            RoomDto roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied, studentSummaryDtos);
             roomDtos.add(roomDto);
+        }
+        
+        return roomDtos;
+    }
+
+    public List<RoomDto> getAvailableRooms() {
+        List<Room> rooms = roomRepository.findAll();
+        List<RoomDto> roomDtos = new ArrayList<>();
+        
+        for (Room room : rooms) {
+            List<Student> studentsInRoom = studentRepository.findStudentsByRoomId(room.getId());
+            int currentOccupancy = studentsInRoom.size();
+            
+            if (currentOccupancy < room.getCapacity()) {
+                RoomDto roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), currentOccupancy >= room.getCapacity(), new ArrayList<>());
+                roomDtos.add(roomDto);
+            }
         }
         
         return roomDtos;
@@ -60,7 +78,8 @@ public class RoomService {
                 }
             }
             
-            return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied(), studentSummaryDtos);
+            boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+            return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied, studentSummaryDtos);
         }
         return null;
     }
@@ -104,7 +123,8 @@ public class RoomService {
                 }
             }
             
-            return new RoomDto(updatedRoom.getId(), updatedRoom.getRoomNumber(), updatedRoom.getCapacity(), updatedRoom.getOccupied(), studentSummaryDtos);
+            boolean isOccupied = studentSummaryDtos.size() >= updatedRoom.getCapacity();
+            return new RoomDto(updatedRoom.getId(), updatedRoom.getRoomNumber(), updatedRoom.getCapacity(), isOccupied, studentSummaryDtos);
         }
         return null;
     }
@@ -133,7 +153,8 @@ public class RoomService {
                 }
             }
             
-            return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied(), studentSummaryDtos);
+            boolean isOccupied = studentSummaryDtos.size() >= room.getCapacity();
+            return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied, studentSummaryDtos);
         }
         return null;
     }
@@ -174,7 +195,8 @@ public class RoomService {
                     }
                 }
                 
-                return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied(), studentSummaryDtos);
+                boolean isOccupied = studentSummaryDtos.size() >= room.getCapacity();
+                return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied, studentSummaryDtos);
             }
         }
         return null;
@@ -205,7 +227,8 @@ public class RoomService {
                 }
             }
             
-            return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied(), studentSummaryDtos);
+            boolean isOccupied = studentSummaryDtos.size() >= room.getCapacity();
+            return new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied, studentSummaryDtos);
         }
         return null;
     }

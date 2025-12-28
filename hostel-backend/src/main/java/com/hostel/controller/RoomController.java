@@ -12,19 +12,25 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/api/admin")
+@RequestMapping("/api")
 public class RoomController {
 
     @Autowired
     private RoomService roomService;
 
-    @GetMapping("/rooms")
+    @GetMapping("/admin/rooms")
     public ResponseEntity<List<RoomDto>> getAllRooms() {
         List<RoomDto> rooms = roomService.getAllRooms();
         return ResponseEntity.ok(rooms);
     }
 
-    @GetMapping("/rooms/{id}")
+    @GetMapping("/student/rooms")
+    public ResponseEntity<List<RoomDto>> getAvailableRooms() {
+        List<RoomDto> rooms = roomService.getAvailableRooms();
+        return ResponseEntity.ok(rooms);
+    }
+
+    @GetMapping("/admin/rooms/{id}")
     public ResponseEntity<RoomDto> getRoomById(@PathVariable Long id) {
         RoomDto room = roomService.getRoomById(id);
         if (room != null) {
@@ -33,7 +39,7 @@ public class RoomController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/rooms")
+    @PostMapping("/admin/rooms")
     public ResponseEntity<?> createRoom(@Valid @RequestBody RoomDto roomDto) {
         try {
             RoomDto room = roomService.createRoom(roomDto);
@@ -43,7 +49,7 @@ public class RoomController {
         }
     }
 
-    @PutMapping("/rooms/{id}")
+    @PutMapping("/admin/rooms/{id}")
     public ResponseEntity<?> updateRoom(@PathVariable Long id, @Valid @RequestBody RoomDto roomDto) {
         try {
             RoomDto room = roomService.updateRoom(id, roomDto);
@@ -56,13 +62,13 @@ public class RoomController {
         }
     }
 
-    @DeleteMapping("/rooms/{id}")
+    @DeleteMapping("/admin/rooms/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
         roomService.deleteRoom(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/rooms/{roomId}/allocate/{studentId}")
+    @PutMapping("/admin/rooms/{roomId}/allocate/{studentId}")
     public ResponseEntity<RoomDto> allocateRoomToStudent(@PathVariable Long roomId, @PathVariable Long studentId) {
         RoomDto room = roomService.allocateRoomToStudent(roomId, studentId);
         if (room != null) {
@@ -71,7 +77,7 @@ public class RoomController {
         return ResponseEntity.badRequest().build();
     }
 
-    @PutMapping("/rooms/{roomId}/deallocate")
+    @PutMapping("/admin/rooms/{roomId}/deallocate")
     public ResponseEntity<RoomDto> deallocateRoom(@PathVariable Long roomId) {
         RoomDto room = roomService.deallocateRoom(roomId);
         if (room != null) {
@@ -80,7 +86,7 @@ public class RoomController {
         return ResponseEntity.badRequest().build();
     }
     
-    @PutMapping("/rooms/{roomId}/deallocate-student/{studentId}")
+    @PutMapping("/admin/rooms/{roomId}/deallocate-student/{studentId}")
     public ResponseEntity<RoomDto> deallocateStudentFromRoom(@PathVariable Long roomId, @PathVariable Long studentId) {
         RoomDto room = roomService.deallocateStudentFromRoom(roomId, studentId);
         if (room != null) {

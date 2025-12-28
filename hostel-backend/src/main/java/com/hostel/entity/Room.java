@@ -29,42 +29,44 @@ public class Room {
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private List<Student> students;
 
-    // Constructors
     public Room() {}
 
-    public Room(String roomNumber, Integer capacity) {
-        this.roomNumber = roomNumber;
-        this.capacity = capacity;
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
+    public Room(Long id, String roomNumber, Integer capacity, Boolean occupied) {
         this.id = id;
-    }
-
-    public String getRoomNumber() {
-        return roomNumber;
-    }
-
-    public void setRoomNumber(String roomNumber) {
         this.roomNumber = roomNumber;
-    }
-
-    public Integer getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+        this.occupied = occupied;
     }
+
+    public static RoomBuilder builder() {
+        return new RoomBuilder();
+    }
+
+    public static class RoomBuilder {
+        private Long id;
+        private String roomNumber;
+        private Integer capacity;
+        private Boolean occupied;
+
+        public RoomBuilder id(Long id) { this.id = id; return this; }
+        public RoomBuilder roomNumber(String roomNumber) { this.roomNumber = roomNumber; return this; }
+        public RoomBuilder capacity(Integer capacity) { this.capacity = capacity; return this; }
+        public RoomBuilder occupied(Boolean occupied) { this.occupied = occupied; return this; }
+        public Room build() { return new Room(id, roomNumber, capacity, occupied); }
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getRoomNumber() { return roomNumber; }
+    public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
+    public Integer getCapacity() { return capacity; }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+    public void setOccupied(Boolean occupied) { this.occupied = occupied; }
+    public List<Student> getStudents() { return students; }
+    public void setStudents(List<Student> students) { this.students = students; }
 
     public Boolean getOccupied() {
-        // Room is occupied if the number of students equals or exceeds the capacity
-        if (students == null) {
+        if (students == null || students.isEmpty()) {
             return false;
         }
         return students.size() >= capacity;
@@ -76,28 +78,5 @@ public class Room {
         } else {
             this.occupied = students.size() >= capacity;
         }
-    }
-
-    // Note: occupied is calculated based on student count vs capacity, so no setter needed
-    // public void setOccupied(Boolean occupied) {
-    //     this.occupied = occupied;
-    // }
-
-    // Note: This method is deprecated since Room now has a one-to-many relationship with Students
-    // Use getStudents() instead to get all students in this room
-    public Student getStudent() {
-        // Return the first student if any exist
-        if (students != null && !students.isEmpty()) {
-            return students.get(0);
-        }
-        return null;
-    }
-
-    public List<Student> getStudents() {
-        return students;
-    }
-
-    public void setStudents(List<Student> students) {
-        this.students = students;
     }
 }

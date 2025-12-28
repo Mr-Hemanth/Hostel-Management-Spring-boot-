@@ -86,9 +86,9 @@ public class RoomBookingRequestService {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
         
-        // Check if student already has a room
-        if (student.getRoom() != null) {
-            throw new RuntimeException("Student is already assigned to a room");
+        // Check if student is already in this room
+        if (student.getRoom() != null && student.getRoom().getId().equals(roomId)) {
+            throw new RuntimeException("Student is already assigned to this room");
         }
         
         // Check if room is available (not at capacity)
@@ -107,7 +107,12 @@ public class RoomBookingRequestService {
         }
         
         // Create new booking request
-        RoomBookingRequest request = new RoomBookingRequest(student, room);
+        RoomBookingRequest request = RoomBookingRequest.builder()
+                .student(student)
+                .room(room)
+                .status(RoomBookingRequest.Status.PENDING)
+                .createdAt(java.time.LocalDateTime.now())
+                .build();
         RoomBookingRequest savedRequest = roomBookingRequestRepository.save(request);
         return mapToDto(savedRequest);
     }
@@ -121,7 +126,27 @@ public class RoomBookingRequestService {
             request.setStatus(newStatus);
             request.setAdminRemarks(adminRemarks);
             
-            if (newStatus == RoomBookingRequest.Status.APPROVED || newStatus == RoomBookingRequest.Status.REJECTED) {
+            if (newStatus == RoomBookingRequest.Status.APPROVED) {
+                request.setResolvedAt(java.time.LocalDateTime.now());
+                
+                // Perform the actual room change
+                Student student = request.getStudent();
+                Room newRoom = request.getRoom();
+                Room oldRoom = student.getRoom();
+                
+                student.setRoom(newRoom);
+                studentRepository.save(student);
+                
+                // Update new room occupancy status
+                newRoom.updateOccupiedStatus();
+                roomRepository.save(newRoom);
+                
+                // Update old room occupancy status if it existed
+                if (oldRoom != null) {
+                    oldRoom.updateOccupiedStatus();
+                    roomRepository.save(oldRoom);
+                }
+            } else if (newStatus == RoomBookingRequest.Status.REJECTED) {
                 request.setResolvedAt(java.time.LocalDateTime.now());
             }
             
@@ -139,11 +164,11 @@ public class RoomBookingRequestService {
         return new RoomBookingRequestDto(
             request.getId(),
             request.getStudent().getId(),
-            request.getStudent().getUser().getName(),
-            request.getStudent().getUser().getEmail(),
-            request.getRoom().getId(),
-            request.getRoom().getRoomNumber(),
-            request.getRoom().getCapacity(),
+            request.getStudent().getUser() != null ? request.getStudent().getUser().getName() : "Unknown",
+            request.getStudent().getUser() != null ? request.getStudent().getUser().getEmail() : "Unknown",
+            request.getRoom() != null ? request.getRoom().getId() : null,
+            request.getRoom() != null ? request.getRoom().getRoomNumber() : "N/A",
+            request.getRoom() != null ? request.getRoom().getCapacity() : 0,
             request.getStatus(),
             request.getCreatedAt(),
             request.getResolvedAt(),

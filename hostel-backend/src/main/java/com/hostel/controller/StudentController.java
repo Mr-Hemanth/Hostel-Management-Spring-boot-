@@ -71,7 +71,7 @@ public class StudentController {
             String email = authentication.getName();
             User user = userRepository.findByEmail(email).orElse(null);
             if (user != null) {
-                StudentDto student = studentService.getStudentByUserId(user.getId());
+                StudentDto student = studentService.getStudentDtoByUserId(user.getId());
                 if (student != null) {
                     return ResponseEntity.ok(student);
                 }

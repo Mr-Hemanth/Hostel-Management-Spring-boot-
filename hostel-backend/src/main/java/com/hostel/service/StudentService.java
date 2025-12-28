@@ -30,11 +30,15 @@ public class StudentService {
         
         for (Student student : students) {
             User user = student.getUser();
+            if (user == null) continue;
             UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
             RoomDto roomDto = null;
             if (student.getRoom() != null) {
                 Room room = student.getRoom();
-                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+                // We need to know the actual occupancy of the room
+                List<Student> studentsInRoom = studentRepository.findStudentsByRoomId(room.getId());
+                boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied);
             }
             
             studentDtos.add(new StudentDto(student.getId(), userDto, roomDto));
@@ -49,6 +53,7 @@ public class StudentService {
         
         for (Student student : students) {
             User user = student.getUser();
+            if (user == null) continue;
             UserDisplayDto userDto = new UserDisplayDto(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
             
             studentDtos.add(new StudentDto(student.getId(), userDto, null));
@@ -76,7 +81,9 @@ public class StudentService {
             RoomDto roomDto = null;
             if (student.getRoom() != null) {
                 Room room = student.getRoom();
-                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+                List<Student> studentsInRoom = studentRepository.findStudentsByRoomId(room.getId());
+                boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied);
             }
             
             StudentDto studentDto = new StudentDto(student.getId(), userDto, roomDto);
@@ -94,7 +101,9 @@ public class StudentService {
             RoomDto roomDto = null;
             if (student.getRoom() != null) {
                 Room room = student.getRoom();
-                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+                List<Student> studentsInRoom = studentRepository.findStudentsByRoomId(room.getId());
+                boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied);
             }
             
             return new StudentDto(student.getId(), userDto, roomDto);
@@ -102,7 +111,11 @@ public class StudentService {
         return null;
     }
 
-    public StudentDto getStudentByUserId(Long userId) {
+    public Student getStudentByUserId(Long userId) {
+        return studentRepository.findByUserId(userId);
+    }
+
+    public StudentDto getStudentDtoByUserId(Long userId) {
         Student student = studentRepository.findByUserId(userId);
         if (student == null) {
             // If no student exists for this user, create one
@@ -121,7 +134,9 @@ public class StudentService {
             RoomDto roomDto = null;
             if (student.getRoom() != null) {
                 Room room = student.getRoom();
-                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+                List<Student> studentsInRoom = studentRepository.findStudentsByRoomId(room.getId());
+                boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied);
             }
             
             return new StudentDto(student.getId(), userDto, roomDto);
@@ -140,7 +155,9 @@ public class StudentService {
                 RoomDto roomDto = null;
                 if (existingStudent.getRoom() != null) {
                     Room room = existingStudent.getRoom();
-                    roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+                    List<Student> studentsInRoom = studentRepository.findStudentsByRoomId(room.getId());
+                    boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+                    roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied);
                 }
                             
                 return new StudentDto(existingStudent.getId(), userDto, roomDto);
@@ -170,7 +187,9 @@ public class StudentService {
             RoomDto roomDto = null;
             if (updatedStudent.getRoom() != null) {
                 Room room = updatedStudent.getRoom();
-                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), room.getOccupied());
+                List<Student> studentsInRoom = studentRepository.findStudentsByRoomId(room.getId());
+                boolean isOccupied = studentsInRoom.size() >= room.getCapacity();
+                roomDto = new RoomDto(room.getId(), room.getRoomNumber(), room.getCapacity(), isOccupied);
             }
             
             return new StudentDto(updatedStudent.getId(), userDto, roomDto);

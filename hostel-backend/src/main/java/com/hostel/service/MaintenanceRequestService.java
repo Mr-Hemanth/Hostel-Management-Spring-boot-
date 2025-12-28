@@ -123,10 +123,10 @@ public class MaintenanceRequestService {
     private MaintenanceRequestDto mapToDto(MaintenanceRequest request) {
         return new MaintenanceRequestDto(
             request.getId(),
-            request.getRoom().getId(),
-            request.getRoom().getRoomNumber(),
+            request.getRoom() != null ? request.getRoom().getId() : null,
+            request.getRoom() != null ? request.getRoom().getRoomNumber() : "N/A",
             request.getStudent().getId(),
-            request.getStudent().getUser().getName(),
+            request.getStudent().getUser() != null ? request.getStudent().getUser().getName() : "Unknown",
             request.getDescription(),
             request.getStatus(),
             request.getCreatedAt(),

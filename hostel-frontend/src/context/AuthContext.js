@@ -31,9 +31,19 @@ export const AuthProvider = ({ children }) => {
             if (response.status === 200) {
                 const data = response.data;
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify({ email, role: data.role }));
+                localStorage.setItem('user', JSON.stringify({ 
+                    email, 
+                    role: data.role,
+                    userId: data.userId,
+                    studentId: data.studentId
+                }));
                 setToken(data.token);
-                setUser({ email, role: data.role });
+                setUser({ 
+                    email, 
+                    role: data.role,
+                    userId: data.userId,
+                    studentId: data.studentId
+                });
                 // Return success with role info, let the component handle navigation
                 return { success: true, message: data.message, role: data.role };
             } else {
@@ -41,7 +51,8 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             if (error.response) {
-                return { success: false, message: error.response.data || 'Login failed' };
+                const errorMessage = error.response.data.message || error.response.data.error || 'Login failed';
+                return { success: false, message: typeof errorMessage === 'object' ? 'Login failed' : errorMessage };
             } else {
                 return { success: false, message: 'Network error' };
             }
@@ -55,16 +66,27 @@ export const AuthProvider = ({ children }) => {
             if (response.status === 200) {
                 const data = response.data;
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify({ email, role: data.role }));
+                localStorage.setItem('user', JSON.stringify({ 
+                    email, 
+                    role: data.role,
+                    userId: data.userId,
+                    studentId: data.studentId
+                }));
                 setToken(data.token);
-                setUser({ email, role: data.role });
+                setUser({ 
+                    email, 
+                    role: data.role,
+                    userId: data.userId,
+                    studentId: data.studentId
+                });
                 return { success: true, message: data.message, role: data.role };
             } else {
-                return { success: false, message: response.data || 'Registration failed' };
+                return { success: false, message: response.data.message || 'Registration failed' };
             }
         } catch (error) {
             if (error.response) {
-                return { success: false, message: error.response.data || 'Registration failed' };
+                const errorMessage = error.response.data.message || error.response.data.error || 'Registration failed';
+                return { success: false, message: typeof errorMessage === 'object' ? 'Registration failed' : errorMessage };
             } else {
                 return { success: false, message: 'Network error' };
             }
