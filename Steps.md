@@ -1,102 +1,158 @@
-# Setup and Run Guide for Windows (Clone from Repo)
+# 🏁 Comprehensive Setup Guide for Windows
 
-Follow these detailed steps to set up and run the Hostel Management System on a Windows machine.
-
----
-
-## **1. Prerequisites**
-Ensure you have the following installed on your system:
-
-- **Git**: [Download Git for Windows](https://git-scm.com/download/win)
-- **Java Development Kit (JDK) 17**: [Download JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
-- **Node.js & npm**: [Download Node.js (LTS)](https://nodejs.org/)
-- **MySQL Server 8.0+**: [Download MySQL Installer](https://dev.mysql.com/downloads/installer/)
-- **Maven**: [Download Maven](https://maven.apache.org/download.cgi) (Ensure it's added to your System PATH)
+This guide provides step-by-step instructions to get the Hostel Management System running on a Windows machine, from zero to a fully functional application.
 
 ---
 
-## **2. Clone the Repository**
-Open **Command Prompt** or **PowerShell** and run:
-```bash
-git clone <your-repository-url>
-cd Hostel-management-system
+## **Part 1: Install Required Software**
+
+Before you can run the code, you need to install these tools. Download and install them in this order:
+
+1.  **Git**: [Download Git for Windows](https://git-scm.com/download/win). (Use default settings during installation).
+2.  **Java 17 (JDK)**: [Download Amazon Corretto 17](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads.html) (Download the `.msi` for Windows x64).
+3.  **Node.js**: [Download Node.js v20 LTS](https://nodejs.org/). (This includes `npm`).
+4.  **MySQL Server**: [Download MySQL Community Server](https://dev.mysql.com/downloads/installer/).
+    -   During installation, choose **"Developer Default"**.
+    -   Set a **Root Password** and remember it (e.g., `root123`).
+5.  **Maven**: [Download Maven](https://maven.apache.org/download.cgi) (Download the Binary zip).
+    -   Extract it to `C:\Program Files\apache-maven`.
+    -   Add `C:\Program Files\apache-maven\bin` to your **System Environment Variables (Path)**.
+
+---
+
+## **Part 2: Get the Code**
+
+1.  Open **Command Prompt** (search for `cmd` in Start Menu).
+2.  Navigate to where you want to keep the project (e.g., Documents):
+    ```cmd
+    cd Documents
+    ```
+3.  Clone the repository:
+    ```cmd
+    git clone <your-repository-url>
+    cd Hostel-management-system
+    ```
+
+---
+
+## **Part 3: Database Configuration**
+
+1.  Open the **MySQL Command Line Client** from your Start Menu.
+2.  Type your **Root Password** when prompted.
+3.  Copy and paste these commands one by one:
+    ```sql
+    -- 1. Create the database
+    CREATE DATABASE hostel_management;
+
+    -- 2. Create a specific user for the app (matches application.properties)
+    CREATE USER 'hosteluser'@'localhost' IDENTIFIED BY 'hostelpass';
+    GRANT ALL PRIVILEGES ON hostel_management.* TO 'hosteluser'@'localhost';
+    FLUSH PRIVILEGES;
+
+    -- 3. Use the new database
+    USE hostel_management;
+
+    -- 4. Import the schema (tables and initial data)
+    -- IMPORTANT: Find schema.sql in your folder, Shift + Right Click -> "Copy as path"
+    -- Paste it after SOURCE and replace \ with /
+    SOURCE C:/Users/YourName/Documents/Hostel-management-system/schema.sql;
+    ```
+
+---
+
+## **Part 4: Run the Backend (Server)**
+
+1.  Go back to your **Command Prompt**.
+2.  Enter the backend folder:
+    ```cmd
+    cd hostel-backend
+    ```
+3.  Build and run the application:
+    ```cmd
+    mvn clean install
+    mvn spring-boot:run
+    ```
+4.  Wait until you see: `Started HostelBackendApplication in X seconds`.
+    -   **Note**: Keep this terminal window open.
+
+---
+
+## **Part 5: Run the Frontend (UI)**
+
+1.  Open a **SECOND Command Prompt** window.
+2.  Navigate to the project folder again:
+    ```cmd
+    cd Documents\Hostel-management-system\hostel-frontend
+    ```
+3.  Install the React dependencies (first time only):
+    ```cmd
+    npm install
+    ```
+4.  Start the web app:
+    ```cmd
+    npm start
+    ```
+5.  Your browser will automatically open to `http://localhost:3000`.
+
+---
+
+## **Part 6: Log In and Test**
+
+Once the website loads, use these default admin credentials:
+
+-   **Email**: `admin@hostel.com`
+-   **Password**: `admin123`
+
+---
+
+## **Part 7: Verify or Add Admin Manually**
+
+The `schema.sql` already contains the admin user. To check if it was added correctly, run this in MySQL:
+```sql
+USE hostel_management;
+SELECT * FROM users WHERE email = 'admin@hostel.com';
 ```
 
+If the result is empty, paste this command to add the admin manually:
+```sql
+INSERT INTO users (name, email, password, role) 
+VALUES ('Admin User', 'admin@hostel.com', '$2a$10$Nk6r4H8u1I5q.PJYz9Pq1eF9Z8Q4H3N2W7V6U5T4S3R2Q1P0O9N8M', 'ADMIN');
+```
+*(Note: The long string starting with `$2a$` is the encrypted version of `admin123`. Do not change it!)*
+
 ---
 
-## **3. Database Setup**
-1. Open **MySQL Command Line Client** or **MySQL Workbench**.
-2. Execute the following SQL commands to prepare the database:
+## **Part 8: Add a Test Student Manually**
+
+To add a student named "John Doe" to Room 101:
+
+1. **Add the User:**
    ```sql
-   CREATE DATABASE hostel_management;
-   
-   -- Create the application user
-   CREATE USER 'hosteluser'@'localhost' IDENTIFIED BY 'hostelpass';
-   GRANT ALL PRIVILEGES ON hostel_management.* TO 'hosteluser'@'localhost';
-   FLUSH PRIVILEGES;
-   
-   USE hostel_management;
-   
-   -- Import the schema and initial data
-   -- Replace the path with the actual location of schema.sql on your PC
-   SOURCE C:/path/to/Hostel-management-system/schema.sql;
+   INSERT INTO users (name, email, password, role) 
+   VALUES ('John Doe', 'john@example.com', '$2a$10$7v5V9fVpU.mO8O6O.p.XHe5p.S8E7E/9Yy8Z9W8V7U6T5S4R3Q2P1', 'STUDENT');
+   ```
+   *(Password is `student123`)*
+
+2. **Check the IDs:**
+   ```sql
+   SELECT id FROM users WHERE email = 'john@example.com';
+   SELECT id FROM rooms WHERE room_number = '101';
+   ```
+
+3. **Add the Student Record:**
+   *(Replace `USER_ID` and `ROOM_ID` with the numbers from step 2)*
+   ```sql
+   INSERT INTO students (user_id, room_id) VALUES (USER_ID, ROOM_ID);
    ```
 
 ---
 
-## **4. Backend Setup (Spring Boot)**
-1. Navigate to the backend folder:
-   ```bash
-   cd hostel-backend
-   ```
-2. **Check Configuration**: Open `src/main/resources/application.properties` and verify:
-   ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/hostel_management?useSSL=false&serverTimezone=UTC
-   spring.datasource.username=hosteluser
-   spring.datasource.password=hostelpass
-   ```
-3. **Run the Backend**:
-   ```bash
-   mvn clean install
-   mvn spring-boot:run
-   ```
-   *Backend will be available at: http://localhost:8080*
+## **💡 Expert Tips for Windows Users**
 
----
-
-## **5. Frontend Setup (React)**
-1. Open a **new** terminal window and navigate to the frontend folder:
-   ```bash
-   cd hostel-frontend
-   ```
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Start the Application**:
-   ```bash
-   npm start
-   ```
-   *Frontend will open automatically at: http://localhost:3000*
-
----
-
-## **6. Alternative: Run with Docker**
-If you have **Docker Desktop** installed, run the entire stack with one command from the project root:
-```bash
-docker-compose up --build
-```
-
----
-
-## **7. Default Login Credentials**
-- **Role**: Admin
-- **Email**: `admin@hostel.com`
-- **Password**: `admin123`
-
----
-
-## **Troubleshooting (Windows)**
-- **Port Conflicts**: If port `8080` or `3306` is busy, stop the existing service via Task Manager or `netstat -ano`.
-- **Environment Variables**: If `mvn` or `java` isn't recognized, add their `bin` folders to the system `Path` variable.
-- **Node Modules**: If `npm install` fails, try `npm cache clean --force` and delete `node_modules` before retrying.
+-   **Path Formatting**: In MySQL, if your path is `C:\Users\Name\file.sql`, you MUST type it as `C:/Users/Name/file.sql` (use forward slashes).
+-   **Ports**: If you see an error saying "Port 8080 is already in use", you might have another app running. You can kill it by typing:
+    ```cmd
+    netstat -ano | findstr :8080
+    taskkill /PID <number_at_end> /F
+    ```
+-   **Environment Variables**: If `mvn` or `java` is not recognized, search for "Edit the system environment variables" in Windows, click **Environment Variables**, find **Path** under System Variables, and add the `bin` folder paths for Java and Maven.

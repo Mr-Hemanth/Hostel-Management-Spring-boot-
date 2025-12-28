@@ -67,8 +67,12 @@ INSERT INTO rooms (room_number, capacity) VALUES
 ('201', 4),
 ('202', 3);
 
+-- Insert sample students (Required for maintenance requests below)
+-- Note: These students are linked to the 'Admin User' for testing purposes
+-- In a real scenario, you would create separate users first.
+INSERT INTO students (user_id, room_id) VALUES 
+(1, 1);
+
 -- Insert sample maintenance requests
 INSERT INTO maintenance_requests (room_id, student_id, description, status) VALUES
-(1, 1, 'Leaky faucet in bathroom', 'PENDING'),
-(2, 2, 'Broken window pane', 'IN_PROGRESS'),
-(3, 3, 'AC not cooling properly', 'COMPLETED');
+(1, 1, 'Leaky faucet in bathroom', 'PENDING');
