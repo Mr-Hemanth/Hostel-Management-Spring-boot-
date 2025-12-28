@@ -147,6 +147,44 @@ To add a student named "John Doe" to Room 101:
 
 ---
 
+## **Part 9: Database Connection Errors (500 Error)**
+
+If you see a `500 Internal Server Error` during login, it usually means the backend cannot talk to your MySQL database. 
+
+1. **Check if MySQL is running.**
+2. **Create the specific user the app expects:**
+   Run these commands in your MySQL terminal:
+   ```sql
+   CREATE USER IF NOT EXISTS 'hosteluser'@'localhost' IDENTIFIED BY 'hostelpass';
+   GRANT ALL PRIVILEGES ON hostel_management.* TO 'hosteluser'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
+3. **Restart the Backend** after running these commands.
+
+---
+
+## **Part 10: Windows-Specific Login Fixes**
+
+If your friend is on Windows and login is failing:
+
+1. **Fix MySQL Authentication:**
+   Open MySQL Command Line and run:
+   ```sql
+   ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '34576';
+   FLUSH PRIVILEGES;
+   ```
+
+2. **Update `application.properties`:**
+   Use `127.0.0.1` instead of `localhost` and add `allowPublicKeyRetrieval`:
+   ```properties
+   spring.datasource.url=jdbc:mysql://127.0.0.1:3306/hostel_management?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
+   ```
+
+3. **Check Firewall:**
+   Ensure Windows Firewall isn't blocking Java/JDK from accessing the network.
+
+---
+
 ## **💡 Expert Tips for Windows Users**
 
 -   **Path Formatting**: In MySQL, if your path is `C:\Users\Name\file.sql`, you MUST type it as `C:/Users/Name/file.sql` (use forward slashes).

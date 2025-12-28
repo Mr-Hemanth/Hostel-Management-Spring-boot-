@@ -29,8 +29,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Student> students;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Student student;
 
     public User() {}
 
@@ -61,17 +61,18 @@ public class User implements UserDetails {
         public User build() { return new User(id, name, email, password, role); }
     }
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    public void setPassword(String password) { this.password = password; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
-    public void setPassword(String password) { this.password = password; }
-    public List<Student> getStudents() { return students; }
-    public void setStudents(List<Student> students) { this.students = students; }
+    public Student getStudent() { return student; }
+    public void setStudent(Student student) { this.student = student; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
