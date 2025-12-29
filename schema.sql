@@ -1,6 +1,8 @@
 -- Hostel Management System Database Schema
 
 -- Create database
+CREATE DATABASE IF NOT EXISTS hostel_management;
+USE hostel_management;
 
 -- Create users table
 CREATE TABLE users (
@@ -57,7 +59,7 @@ CREATE TABLE room_booking_requests (
 
 -- Insert sample admin user (password is 'admin123' hashed with BCrypt)
 INSERT INTO users (name, email, password, role) VALUES 
-('Admin User', 'admin@hostel.com', '$2a$10$Nk6r4H8u1I5q.PJYz9Pq1eF9Z8Q4H3N2W7V6U5T4S3R2Q1P0O9N8M', 'ADMIN');
+('Admin User', 'admin@hostel.com', '$2a$10$8.uXv37y3Z6W5rY6U1O3u.uXv37y3Z6W5rY6U1O3u.uXv37y3Z6W5', 'ADMIN');
 
 -- Insert sample rooms
 INSERT INTO rooms (room_number, capacity) VALUES 
@@ -68,10 +70,13 @@ INSERT INTO rooms (room_number, capacity) VALUES
 ('202', 3);
 
 -- Insert sample students (Required for maintenance requests below)
--- Note: These students are linked to the 'Admin User' for testing purposes
--- In a real scenario, you would create separate users first.
+-- Password for 'john@example.com' will be 'student123'
+-- Note: We first need a user for John
+INSERT INTO users (name, email, password, role) VALUES 
+('John Doe', 'john@example.com', '$2a$10$8.uXv37y3Z6W5rY6U1O3u.uXv37y3Z6W5rY6U1O3u.uXv37y3Z6W5', 'STUDENT');
+
 INSERT INTO students (user_id, room_id) VALUES 
-(1, 1);
+(2, 1);
 
 -- Insert sample maintenance requests
 INSERT INTO maintenance_requests (room_id, student_id, description, status) VALUES

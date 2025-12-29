@@ -27,7 +27,7 @@ public class SecurityConfig {
     private JwtFilter jwtFilter;
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public org.springframework.security.crypto.password.PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

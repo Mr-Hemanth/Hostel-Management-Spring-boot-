@@ -32,27 +32,39 @@ public class AuthService {
     }
 
     public AuthResponse authenticateUser(AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequest.getEmail(),
-                        authRequest.getPassword()
-                )
-        );
+        System.out.println("Attempting login for email: " + authRequest.getEmail());
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequest.getEmail(),
+                            authRequest.getPassword()
+                    )
+            );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        
-        User user = (User) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        
-        Long studentId = null;
-        if (Role.STUDENT.equals(user.getRole())) {
-            com.hostel.entity.Student student = studentService.getStudentByUserId(user.getId());
-            if (student != null) {
-                studentId = student.getId();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            User user = (User) authentication.getPrincipal();
+            System.out.println("User authenticated: " + user.getEmail() + " with role: " + user.getRole());
+            
+            String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+            
+            Long studentId = null;
+            if (Role.STUDENT.equals(user.getRole())) {
+                com.hostel.entity.Student student = studentService.getStudentByUserId(user.getId());
+                if (student != null) {
+                    studentId = student.getId();
+                }
             }
+            
+            return new AuthResponse(token, "Login successful", user.getRole().name(), user.getId(), studentId);
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            System.err.println("Invalid credentials for: " + authRequest.getEmail());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Login error: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Login failed: " + e.getMessage());
         }
-        
-        return new AuthResponse(token, "Login successful", user.getRole().name(), user.getId(), studentId);
     }
 
     public AuthResponse register(UserDto userDto) {
